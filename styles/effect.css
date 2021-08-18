@@ -1,0 +1,146 @@
+:root {
+  --timeout: 400ms;
+  --blur: 20px;
+}
+
+.fade-enter, .fade-appear {
+  transition: all var(--timeout);
+  opacity: 0;
+}
+
+.fade-enter-active, .fade-appear-active {
+  transition: all var(--timeout);
+  opacity: 1;
+}
+
+.fade-exit {
+  transition: all var(--timeout);
+  opacity: 1;
+}
+
+.fade-exit-active {
+  transition: all var(--timeout);
+  opacity: 0;
+}
+
+.fade-blur-enter, .fade-blur-appear {
+  transition: all var(--timeout);
+  filter: blur(var(--blur));
+  opacity: 0;
+}
+
+.fade-blur-enter-active, .fade-blur-appear-active {
+  transition: all var(--timeout);
+  filter: blur(0);
+  opacity: 1;
+}
+
+.fade-blur-exit {
+  transition: all var(--timeout);
+  filter: blur(0);
+  opacity: 1;
+}
+
+.fade-blur-exit-active {
+  transition: all var(--timeout);
+  filter: blur(var(--blur));
+  opacity: 0;
+}
+
+.fade-down-enter, .fade-down-appear {
+  transition: all var(--timeout);
+  transform: translateY(-2rem);
+  opacity: 0;
+}
+
+.fade-down-enter-active, .fade-down-appear-active {
+  transition: all var(--timeout);
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.fade-down-exit {
+  transition: all var(--timeout);
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.fade-down-exit-active {
+  transition: all var(--timeout);
+  transform: translateY(-2rem);
+  opacity: 0;
+}
+
+
+.fade-up-enter, .fade-up-appear {
+  transition: all var(--timeout);
+  transform: translateY(2rem);
+  opacity: 0;
+}
+
+.fade-up-enter-active, .fade-up-appear-active {
+  transition: all var(--timeout);
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.fade-up-exit {
+  transition: all var(--timeout);
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.fade-up-exit-active {
+  transition: all var(--timeout);
+  transform: translateY(2rem);
+  opacity: 0;
+}
+
+.fade-left-enter, .fade-left-appear {
+  transition: all var(--timeout);
+  transform: translateX(-2rem);
+  opacity: 0;
+}
+
+.fade-left-enter-active, .fade-left-appear-active {
+  transition: all var(--timeout);
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.fade-left-exit {
+  transition: all var(--timeout);
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.fade-left-exit-active {
+  transition: all var(--timeout);
+  transform: translateX(-2rem);
+  opacity: 0;
+}
+
+
+.fade-right-enter, .fade-right-appear {
+  transition: all var(--timeout);
+  transform: translateX(2rem);
+  opacity: 0;
+}
+
+.fade-right-enter-active, .fade-right-appear-active {
+  transition: all var(--timeout);
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.fade-right-exit {
+  transition: all var(--timeout);
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.fade-right-exit-active {
+  transition: all var(--timeout);
+  transform: translateX(2rem);
+  opacity: 0;
+}
