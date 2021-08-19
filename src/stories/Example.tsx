@@ -47,7 +47,6 @@ export function ExampleConsumer() {
 
       <AwaitConsumer
         name={'test'}
-        animationDuration={400}
         style={{width: 300, backgroundColor: '#eee'}}
         errorView={<div>{renderButtons()}Error!</div>}
       >
