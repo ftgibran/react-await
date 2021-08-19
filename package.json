@@ -1,6 +1,6 @@
 {
   "name": "@dev-plus-plus/react-await",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "author": "ftgibran",
   "license": "MIT",
@@ -19,7 +19,8 @@
     "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "release": "yarn build && yarn test && np"
   },
   "files": [
     "dist",
@@ -59,6 +60,7 @@
     "eslint-plugin-react": "^7.24.0",
     "jest": "^27.0.6",
     "microbundle-crl": "^0.13.11",
+    "np": "^7.5.0",
     "prop-types": "^15.7.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
