@@ -1,11 +1,24 @@
 import React from 'react'
 import {BarLoader} from 'react-spinners'
-import {AwaitConsumer, AwaitProvider, useAwait} from '..'
+import {AwaitConsumer, AwaitProvider, AwaitState, useAwait} from '..'
 
 import '../../styles/effect.css'
 
 export function ExampleConsumer() {
   const test = useAwait('test')
+
+  const stringifyState = () => {
+    switch (test.state) {
+      case AwaitState.LOADING:
+        return 'Loading'
+      case AwaitState.STANDBY:
+        return 'Standby'
+      case AwaitState.ERROR:
+        return 'Error'
+      default:
+        return 'Unset'
+    }
+  }
 
   const runFakeSuccess = async () => {
     await new Promise((resolve) => setTimeout(resolve, 2000))
@@ -30,7 +43,8 @@ export function ExampleConsumer() {
 
   return (
     <>
-      State: {test.state}
+      <div style={{marginBottom: 10}}>State: {stringifyState()}</div>
+
       <AwaitConsumer
         name={'test'}
         animationDuration={400}

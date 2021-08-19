@@ -11,7 +11,7 @@ export function AwaitProvider(props: AwaitProviderProps & AwaitContextOptions) {
   const {children, ...options} = props
 
   const initialContextState: AwaitContextState = {
-    dataState: {},
+    record: {},
     ...options,
   }
 

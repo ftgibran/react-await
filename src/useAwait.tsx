@@ -8,8 +8,8 @@ export function useAwait(name: string, index?: number) {
   const [state, setState] = useState<AwaitState>()
 
   useEffect(() => {
-    setState(ctx.dataState?.[getFullName()])
-  }, [ctx.dataState])
+    setState(ctx.record?.[getFullName()])
+  }, [ctx.record])
 
   function getFullName() {
     return `${name}${index !== undefined ? `__${index}` : ''}`
@@ -33,28 +33,31 @@ export function useAwait(name: string, index?: number) {
 
   function init() {
     ctx.setContextState?.((state) => {
-      const data = {...state.dataState}
+      const data = {...state.record}
       data[getFullName()] = AwaitState.LOADING
+      setState(data[getFullName()])
 
-      return {...state, dataState: {...data}}
+      return {...state, record: {...data}}
     })
   }
 
   function done() {
     ctx.setContextState?.((state) => {
-      const data = {...state.dataState}
+      const data = {...state.record}
       data[getFullName()] = AwaitState.STANDBY
+      setState(data[getFullName()])
 
-      return {...state, dataState: {...data}}
+      return {...state, record: {...data}}
     })
   }
 
   function error() {
     ctx.setContextState?.((state) => {
-      const data = {...state.dataState}
+      const data = {...state.record}
       data[getFullName()] = AwaitState.ERROR
+      setState(data[getFullName()])
 
-      return {...state, dataState: {...data}}
+      return {...state, record: {...data}}
     })
   }
 
@@ -81,6 +84,7 @@ export function useAwait(name: string, index?: number) {
   return useMemo(
     () => ({
       state,
+      stateRecord: ctx.record ?? {},
       getFullName,
       isStateUndefined,
       isStateStandby,
@@ -91,6 +95,6 @@ export function useAwait(name: string, index?: number) {
       error,
       run,
     }),
-    [state]
+    [state, ctx.record]
   )
 }

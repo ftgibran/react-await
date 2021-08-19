@@ -14,7 +14,6 @@ export interface AwaitConsumerProps {
   onLoadingEnd?: () => void
   onError?: () => void
   children?: React.ReactElement | React.ReactElement[]
-  defaultView?: React.ReactElement
   loadingView?: React.ReactElement
   errorView?: React.ReactElement
 }
@@ -37,7 +36,6 @@ export function AwaitConsumer(props: AwaitConsumerProps & HTMLProps) {
     onLoadingEnd,
     onError,
     children,
-    defaultView,
     loadingView,
     errorView,
     ...htmlProps
@@ -105,12 +103,10 @@ export function AwaitConsumer(props: AwaitConsumerProps & HTMLProps) {
               )}
 
               {hooker.isStateError() &&
-                (errorView ??
-                  defaultView ??
-                  (children as React.ReactElement) ?? <div />)}
+                (errorView ?? (children as React.ReactElement) ?? <div />)}
 
-              {(hooker.isStateStandby() || hooker.isStateUndefined()) &&
-                (defaultView ?? (children as React.ReactElement) ?? <div />)}
+              {((hooker.isStateStandby() || hooker.isStateUndefined()) &&
+                (children as React.ReactElement)) ?? <div />}
             </div>
           </CSSTransition>
         </SwitchTransition>
@@ -130,7 +126,6 @@ AwaitConsumer.propTypes = {
     PropTypes.element,
     PropTypes.arrayOf(PropTypes.element.isRequired),
   ]),
-  defaultView: PropTypes.element,
   loadingView: PropTypes.element,
   errorView: PropTypes.element,
 }
