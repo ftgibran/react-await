@@ -1,10 +1,10 @@
 {
   "name": "@dev-plus-plus/react-await",
   "version": "1.0.1-0",
-  "private": true,
+  "private": false,
   "author": "ftgibran",
   "license": "MIT",
-  "repository": "simplitech/redux-wrapper",
+  "repository": "ftgibran/react-await",
   "main": "dist/index.js",
   "module": "dist/index.modern.js",
   "types": "dist/index.d.ts",
