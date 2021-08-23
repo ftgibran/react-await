@@ -1,8 +1,8 @@
 import React from 'react'
 import {BarLoader} from 'react-spinners'
-import {AwaitConsumer, AwaitProvider, AwaitState, useAwait} from '..'
+import {AwaitConsumer, AwaitProvider, AwaitState, useAwait} from '../src'
 
-import '../../styles/effect.css'
+import '../styles/effect.css'
 
 export function ExampleConsumer() {
   const test = useAwait('test')
