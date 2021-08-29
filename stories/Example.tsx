@@ -6,6 +6,7 @@ import '../styles/effect.css'
 
 export function ExampleConsumer() {
   const test = useAwait('test')
+  const test2 = useAwait('test2')
 
   const stringifyState = () => {
     switch (test.state) {
@@ -21,11 +22,11 @@ export function ExampleConsumer() {
   }
 
   const runFakeSuccess = async () => {
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+    await new Promise((resolve) => setTimeout(resolve, 4000))
   }
 
   const runFakeError = async () => {
-    await new Promise((_resolve, reject) => setTimeout(reject, 2000))
+    await new Promise((_resolve, reject) => setTimeout(reject, 4000))
   }
 
   const renderButtons = () => (
@@ -47,12 +48,20 @@ export function ExampleConsumer() {
 
       <AwaitConsumer
         name={'test'}
-        style={{width: 300, backgroundColor: '#eee'}}
+        style={{width: 300, backgroundColor: '#eee', marginBottom: 10}}
         errorView={<div>{renderButtons()}Error!</div>}
       >
         {renderButtons()}
 
         <div style={{textAlign: 'center'}}>This content will be load</div>
+      </AwaitConsumer>
+
+      <AwaitConsumer
+        name={'test2'}
+        style={{width: 300, backgroundColor: '#eee'}}
+        loadingView={<div>custom loader...</div>}
+      >
+        <button onClick={() => test2.run(runFakeSuccess)}>Another Fake</button>
       </AwaitConsumer>
     </>
   )
