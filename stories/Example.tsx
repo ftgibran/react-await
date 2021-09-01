@@ -1,15 +1,20 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import {BarLoader} from 'react-spinners'
 import {AwaitConsumer, AwaitProvider, AwaitState, useAwait} from '../src'
 
 import '../styles/effect.css'
 
 export function ExampleConsumer() {
-  const test = useAwait('test')
-  const test2 = useAwait('test2')
+  const awaitHandler1 = useAwait('test1')
+  const awaitHandler2 = useAwait('test2')
+  const awaitHandler3 = useAwait('test3')
+
+  useEffect(() => {
+    awaitHandler3.run(runFakeSuccess, 5000)
+  }, [])
 
   const stringifyState = () => {
-    switch (test.state) {
+    switch (awaitHandler1.state) {
       case AwaitState.LOADING:
         return 'Loading'
       case AwaitState.STANDBY:
@@ -32,13 +37,15 @@ export function ExampleConsumer() {
   const renderButtons = () => (
     <div style={{marginBottom: 20}}>
       <button
-        onClick={() => test.run(runFakeSuccess)}
+        onClick={() => awaitHandler1.run(runFakeSuccess)}
         style={{marginBottom: 20}}
       >
         Fake Success
       </button>
 
-      <button onClick={() => test.run(runFakeError)}>Fake Error</button>
+      <button onClick={() => awaitHandler1.run(runFakeError)}>
+        Fake Error
+      </button>
     </div>
   )
 
@@ -47,7 +54,7 @@ export function ExampleConsumer() {
       <div style={{marginBottom: 10}}>State: {stringifyState()}</div>
 
       <AwaitConsumer
-        name={'test'}
+        handler={awaitHandler1}
         style={{width: 300, backgroundColor: '#eee', marginBottom: 10}}
         errorView={<div>{renderButtons()}Error!</div>}
       >
@@ -57,11 +64,20 @@ export function ExampleConsumer() {
       </AwaitConsumer>
 
       <AwaitConsumer
-        name={'test2'}
-        style={{width: 300, backgroundColor: '#eee'}}
+        handler={awaitHandler2}
+        style={{width: 300, backgroundColor: '#eee', marginBottom: 10}}
         loadingView={<div>custom loader...</div>}
       >
-        <button onClick={() => test2.run(runFakeSuccess)}>Another Fake</button>
+        <button onClick={() => awaitHandler2.run(runFakeSuccess)}>
+          Another Fake
+        </button>
+      </AwaitConsumer>
+
+      <AwaitConsumer
+        handler={awaitHandler3}
+        style={{width: 300, backgroundColor: '#eee'}}
+      >
+        <div>Loaded on start</div>
       </AwaitConsumer>
     </>
   )

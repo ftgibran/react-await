@@ -3,13 +3,13 @@ import {AwaitContext} from './AwaitContext'
 import {AwaitState} from './types'
 
 export function useAwait(name: string, index?: number) {
-  const ctx = useContext(AwaitContext)
+  const context = useContext(AwaitContext)
 
   const [state, setState] = useState<AwaitState>()
 
   useEffect(() => {
-    setState(ctx.record?.[getFullName()])
-  }, [ctx.record])
+    setState(context.record?.[getFullName()])
+  }, [context.record])
 
   function getFullName() {
     return `${name}${index !== undefined ? `__${index}` : ''}`
@@ -32,7 +32,7 @@ export function useAwait(name: string, index?: number) {
   }
 
   function init() {
-    ctx.setContextState?.((state) => {
+    context.setContextState?.((state) => {
       const data = {...state.record}
       data[getFullName()] = AwaitState.LOADING
       setState(data[getFullName()])
@@ -42,7 +42,7 @@ export function useAwait(name: string, index?: number) {
   }
 
   function done() {
-    ctx.setContextState?.((state) => {
+    context.setContextState?.((state) => {
       const data = {...state.record}
       data[getFullName()] = AwaitState.STANDBY
       setState(data[getFullName()])
@@ -52,7 +52,7 @@ export function useAwait(name: string, index?: number) {
   }
 
   function error() {
-    ctx.setContextState?.((state) => {
+    context.setContextState?.((state) => {
       const data = {...state.record}
       data[getFullName()] = AwaitState.ERROR
       setState(data[getFullName()])
@@ -84,7 +84,7 @@ export function useAwait(name: string, index?: number) {
   return useMemo(
     () => ({
       state,
-      stateRecord: ctx.record ?? {},
+      stateRecord: context.record ?? {},
       getFullName,
       isStateUndefined,
       isStateStandby,
@@ -95,6 +95,6 @@ export function useAwait(name: string, index?: number) {
       error,
       run,
     }),
-    [state, ctx.record]
+    [state, context.record]
   )
 }

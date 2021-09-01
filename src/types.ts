@@ -1,4 +1,5 @@
 import React from 'react'
+import type {useAwait} from './useAwait'
 
 export enum AwaitState {
   LOADING,
@@ -18,3 +19,4 @@ export interface AwaitContextOptions {
 }
 
 export type AwaitContextState = AwaitContextData & AwaitContextOptions
+export type AwaitHandler = ReturnType<typeof useAwait>

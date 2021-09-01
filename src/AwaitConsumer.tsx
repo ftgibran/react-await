@@ -3,11 +3,12 @@ import React, {useEffect, useRef, useState} from 'react'
 import {CSSTransition, SwitchTransition} from 'react-transition-group'
 import {useAwait} from './useAwait'
 import {AwaitContext} from './AwaitContext'
-import {AwaitState} from './types'
+import {AwaitHandler, AwaitState} from './types'
 
 export interface AwaitConsumerProps {
-  name: string
+  name?: string
   index?: number
+  handler?: AwaitHandler
   animationClassName?: string
   animationDuration?: number
   onLoadingStart?: () => void
@@ -30,6 +31,7 @@ export function AwaitConsumer(props: AwaitConsumerProps & HTMLProps) {
   const {
     name,
     index,
+    handler,
     animationClassName,
     animationDuration,
     onLoadingStart,
@@ -41,14 +43,19 @@ export function AwaitConsumer(props: AwaitConsumerProps & HTMLProps) {
     ...htmlProps
   } = props
 
-  const hooker = useAwait(name, index)
+  const controller: AwaitHandler | undefined = handler
+    ? handler
+    : name
+    ? useAwait(name, index)
+    : undefined
+
   const ref = useRef<React.DetailedHTMLProps<any, any>>(null)
 
   const [minHeight, setMinHeight] = useState<number>()
   const [minWidth, setMinWidth] = useState<number>()
 
   useEffect(() => {
-    switch (hooker.state) {
+    switch (controller?.state) {
       case AwaitState.LOADING:
         onLoadingStart?.()
         break
@@ -64,14 +71,14 @@ export function AwaitConsumer(props: AwaitConsumerProps & HTMLProps) {
       setMinHeight(ref.current.clientHeight)
       setMinWidth(ref.current.clientWidth)
     }
-  }, [hooker.state])
+  }, [controller?.state])
 
   return (
     <AwaitContext.Consumer>
       {(state) => (
         <SwitchTransition mode={'out-in'}>
           <CSSTransition
-            key={hooker.state ?? AwaitState.STANDBY}
+            key={controller?.state ?? AwaitState.STANDBY}
             classNames={
               animationClassName ??
               state.defaultAnimationClassName ??
@@ -86,7 +93,7 @@ export function AwaitConsumer(props: AwaitConsumerProps & HTMLProps) {
             appear
           >
             <div ref={ref} {...htmlProps}>
-              {hooker.isStateLoading() && (
+              {controller?.isStateLoading() && (
                 <div
                   style={{
                     display: 'flex',
@@ -102,10 +109,11 @@ export function AwaitConsumer(props: AwaitConsumerProps & HTMLProps) {
                 </div>
               )}
 
-              {hooker.isStateError() &&
+              {controller?.isStateError() &&
                 (errorView ?? (children as React.ReactElement) ?? <div />)}
 
-              {((hooker.isStateStandby() || hooker.isStateUndefined()) &&
+              {((controller?.isStateStandby() ||
+                controller?.isStateUndefined()) &&
                 (children as React.ReactElement)) ?? <div />}
             </div>
           </CSSTransition>
@@ -116,7 +124,9 @@ export function AwaitConsumer(props: AwaitConsumerProps & HTMLProps) {
 }
 
 AwaitConsumer.propTypes = {
-  name: PropTypes.string.isRequired,
+  name: PropTypes.string,
+  index: PropTypes.number,
+  handler: PropTypes.object,
   animationClassName: PropTypes.string,
   animationDuration: PropTypes.number,
   onLoadingStart: PropTypes.func,
