@@ -3,16 +3,17 @@ import type {AwaitHandler} from './types'
 
 export interface UseAsyncProps<T, I extends T | undefined, P> {
   initialData?: I
+  params?: P
+  immediate?: boolean
   awaitHandler?: AwaitHandler
   delay?: number
-  params?: P
 }
 
 export function useAsync<T, I extends T | undefined, P>(
   asyncFunc: (params: P) => Promise<T>,
   props: UseAsyncProps<T, I, P> = {}
 ) {
-  const {awaitHandler, delay, params, initialData} = props
+  const {initialData, params, immediate = true, awaitHandler, delay} = props
 
   const [data, setData] = useState<T | I>(initialData as T)
   const [error, setError] = useState<any | null>(null)
@@ -35,10 +36,12 @@ export function useAsync<T, I extends T | undefined, P>(
   }, [asyncFunc, params])
 
   useEffect(() => {
-    if (awaitHandler) {
-      awaitHandler.run(fetch, delay)
-    } else {
-      fetch()
+    if (immediate) {
+      if (awaitHandler) {
+        awaitHandler.run(fetch, delay)
+      } else {
+        fetch()
+      }
     }
 
     return () => {
