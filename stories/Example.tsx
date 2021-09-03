@@ -1,6 +1,12 @@
-import React, {useEffect} from 'react'
+import React from 'react'
 import {BarLoader} from 'react-spinners'
-import {AwaitConsumer, AwaitProvider, AwaitState, useAwait} from '../src'
+import {
+  AwaitConsumer,
+  AwaitProvider,
+  AwaitState,
+  useAsync,
+  useAwait,
+} from '../src'
 
 import '../styles/effect.css'
 
@@ -9,9 +15,18 @@ export function ExampleConsumer() {
   const awaitHandler2 = useAwait('test2')
   const awaitHandler3 = useAwait('test3')
 
-  useEffect(() => {
-    awaitHandler3.run(runFakeSuccess, 5000)
-  }, [])
+  const runFakeSuccess = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 4000))
+  }
+
+  const runFakeError = async () => {
+    await new Promise((_resolve, reject) => setTimeout(reject, 4000))
+  }
+
+  useAsync(runFakeSuccess, {
+    awaitHandler: awaitHandler3,
+    delay: 5000,
+  })
 
   const stringifyState = () => {
     switch (awaitHandler1.state) {
@@ -26,15 +41,7 @@ export function ExampleConsumer() {
     }
   }
 
-  const runFakeSuccess = async () => {
-    await new Promise((resolve) => setTimeout(resolve, 4000))
-  }
-
-  const runFakeError = async () => {
-    await new Promise((_resolve, reject) => setTimeout(reject, 4000))
-  }
-
-  const renderButtons = () => (
+  const CustomButton = () => (
     <div style={{marginBottom: 20}}>
       <button
         onClick={() => awaitHandler1.run(runFakeSuccess)}
@@ -56,9 +63,14 @@ export function ExampleConsumer() {
       <AwaitConsumer
         handler={awaitHandler1}
         style={{width: 300, backgroundColor: '#eee', marginBottom: 10}}
-        errorView={<div>{renderButtons()}Error!</div>}
+        errorView={
+          <div>
+            <CustomButton />
+            Error!
+          </div>
+        }
       >
-        {renderButtons()}
+        <CustomButton />
 
         <div style={{textAlign: 'center'}}>This content will be load</div>
       </AwaitConsumer>
