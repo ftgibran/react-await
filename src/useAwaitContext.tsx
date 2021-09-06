@@ -5,56 +5,35 @@ import {AwaitState} from './types'
 export function useAwaitContext() {
   const context = useContext(AwaitContext)
 
-  function getState(name: string, index?: number) {
-    return context.record?.[getFullName(name, index)]
-  }
+  const getState = (name: string, index?: number) =>
+    context.record[getFullName(name, index)]
 
-  function getFullName(name: string, index?: number) {
-    return `${name}${index !== undefined ? `__${index}` : ''}`
-  }
+  const getFullName = (name: string, index?: number) =>
+    `${name}${index !== undefined ? `__${index}` : ''}`
 
-  function isStateUndefined(name: string, index?: number) {
-    return getState(name, index) === undefined
-  }
+  const isStateUndefined = (name: string, index?: number) =>
+    getState(name, index) === undefined
 
-  function isStateStandby(name: string, index?: number) {
-    return getState(name, index) === AwaitState.STANDBY
-  }
+  const isStateStandby = (name: string, index?: number) =>
+    getState(name, index) === AwaitState.STANDBY
 
-  function isStateLoading(name: string, index?: number) {
-    return getState(name, index) === AwaitState.LOADING
-  }
+  const isStateLoading = (name: string, index?: number) =>
+    getState(name, index) === AwaitState.LOADING
 
-  function isStateError(name: string, index?: number) {
-    return getState(name, index) === AwaitState.ERROR
-  }
+  const isStateError = (name: string, index?: number) =>
+    getState(name, index) === AwaitState.ERROR
 
-  function init(name: string, index?: number) {
-    context.setContextState?.((state) => {
-      const data = {...state.record}
-      data[getFullName(name, index)] = AwaitState.LOADING
+  const setRecord = (state: AwaitState, name: string, index?: number) =>
+    context.setRecord({...context.record, [getFullName(name, index)]: state})
 
-      return {...state, record: {...data}}
-    })
-  }
+  const init = (name: string, index?: number) =>
+    setRecord(AwaitState.LOADING, name, index)
 
-  function done(name: string, index?: number) {
-    context.setContextState?.((state) => {
-      const data = {...state.record}
-      data[getFullName(name, index)] = AwaitState.STANDBY
+  const done = (name: string, index?: number) =>
+    setRecord(AwaitState.STANDBY, name, index)
 
-      return {...state, record: {...data}}
-    })
-  }
-
-  function error(name: string, index?: number) {
-    context.setContextState?.((state) => {
-      const data = {...state.record}
-      data[getFullName(name, index)] = AwaitState.ERROR
-
-      return {...state, record: {...data}}
-    })
-  }
+  const error = (name: string, index?: number) =>
+    setRecord(AwaitState.ERROR, name, index)
 
   async function run<T>(
     name: string,
@@ -80,7 +59,7 @@ export function useAwaitContext() {
 
   return useMemo(
     () => ({
-      stateRecord: context.record ?? {},
+      stateRecord: context.record,
       getFullName,
       isStateUndefined,
       isStateStandby,

@@ -9,8 +9,8 @@ export enum AwaitState {
 }
 
 export interface AwaitContextData {
-  record?: Record<string, AwaitState>
-  setContextState?: React.Dispatch<React.SetStateAction<AwaitContextState>>
+  record: Record<string, AwaitState>
+  setRecord: React.Dispatch<React.SetStateAction<Record<string, AwaitState>>>
 }
 
 export interface AwaitContextOptions {

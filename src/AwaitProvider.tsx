@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 import PropTypes from 'prop-types'
 import {AwaitContext} from './AwaitContext'
-import {AwaitContextOptions, AwaitContextState} from './types'
+import {AwaitContextOptions, AwaitContextState, AwaitState} from './types'
 
 export interface AwaitProviderProps {
   children?: React.ReactElement | React.ReactElement[]
@@ -10,15 +10,16 @@ export interface AwaitProviderProps {
 export function AwaitProvider(props: AwaitProviderProps & AwaitContextOptions) {
   const {children, ...options} = props
 
+  const [record, setRecord] = useState<Record<string, AwaitState>>({})
+
   const initialContextState: AwaitContextState = {
-    record: {},
+    record,
+    setRecord,
     ...options,
   }
 
-  const [contextState, setContextState] = useState(initialContextState)
-
   return (
-    <AwaitContext.Provider value={{...contextState, setContextState}}>
+    <AwaitContext.Provider value={initialContextState}>
       {children}
     </AwaitContext.Provider>
   )

@@ -8,58 +8,26 @@ export function useAwait(name: string, index?: number) {
   const [state, setState] = useState<AwaitState>()
 
   useEffect(() => {
-    setState(context.record?.[getFullName()])
+    setState(context.record[getFullName()])
   }, [context.record])
 
-  function getFullName() {
-    return `${name}${index !== undefined ? `__${index}` : ''}`
-  }
+  const getFullName = () => `${name}${index !== undefined ? `__${index}` : ''}`
 
-  function isStateUndefined() {
-    return state === undefined
-  }
+  const isStateUndefined = () => state === undefined
+  const isStateStandby = () => state === AwaitState.STANDBY
+  const isStateLoading = () => state === AwaitState.LOADING
+  const isStateError = () => state === AwaitState.ERROR
 
-  function isStateStandby() {
-    return state === AwaitState.STANDBY
-  }
-
-  function isStateLoading() {
-    return state === AwaitState.LOADING
-  }
-
-  function isStateError() {
-    return state === AwaitState.ERROR
-  }
-
-  function init() {
-    context.setContextState?.((state) => {
-      const data = {...state.record}
-      data[getFullName()] = AwaitState.LOADING
-      setState(data[getFullName()])
-
-      return {...state, record: {...data}}
+  const setRecord = (state: AwaitState) => {
+    context.setRecord((data) => {
+      setState(state)
+      return {...data, [getFullName()]: state}
     })
   }
 
-  function done() {
-    context.setContextState?.((state) => {
-      const data = {...state.record}
-      data[getFullName()] = AwaitState.STANDBY
-      setState(data[getFullName()])
-
-      return {...state, record: {...data}}
-    })
-  }
-
-  function error() {
-    context.setContextState?.((state) => {
-      const data = {...state.record}
-      data[getFullName()] = AwaitState.ERROR
-      setState(data[getFullName()])
-
-      return {...state, record: {...data}}
-    })
-  }
+  const init = () => setRecord(AwaitState.LOADING)
+  const done = () => setRecord(AwaitState.STANDBY)
+  const error = () => setRecord(AwaitState.ERROR)
 
   async function run<T>(
     func: (...args: any[]) => Promise<T>,
@@ -84,7 +52,7 @@ export function useAwait(name: string, index?: number) {
   return useMemo(
     () => ({
       state,
-      stateRecord: context.record ?? {},
+      stateRecord: context.record,
       getFullName,
       isStateUndefined,
       isStateStandby,
