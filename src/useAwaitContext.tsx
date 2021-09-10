@@ -24,7 +24,7 @@ export function useAwaitContext() {
     getState(name, index) === AwaitState.ERROR
 
   const setRecord = (state: AwaitState, name: string, index?: number) =>
-    context.setRecord({...context.record, [getFullName(name, index)]: state})
+    context.setRecord((data) => ({...data, [getFullName(name, index)]: state}))
 
   const init = (name: string, index?: number) =>
     setRecord(AwaitState.LOADING, name, index)
