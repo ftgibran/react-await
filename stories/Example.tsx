@@ -17,16 +17,22 @@ export function ExampleConsumer() {
 
   const runFakeSuccess = async () => {
     await new Promise((resolve) => setTimeout(resolve, 4000))
+    return 'success'
   }
 
   const runFakeError = async () => {
     await new Promise((_resolve, reject) => setTimeout(reject, 4000))
   }
 
-  useAsync(runFakeSuccess, {
+  const {data} = useAsync(runFakeSuccess, {
     awaitHandler: awaitHandler3,
+    initialData: 'wait',
     delay: 5000,
   })
+
+  // useEffect(() => {
+  //   alert(`${awaitHandler3.state} - ${data}`)
+  // }, [awaitHandler3.state])
 
   const stringifyState = () => {
     switch (awaitHandler1.state) {
@@ -89,7 +95,7 @@ export function ExampleConsumer() {
         handler={awaitHandler3}
         style={{width: 300, backgroundColor: '#eee'}}
       >
-        <div>Loaded on start</div>
+        <div>Loaded on start - {data}</div>
       </AwaitConsumer>
     </>
   )

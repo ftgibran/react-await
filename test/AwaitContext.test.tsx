@@ -62,6 +62,7 @@ describe('AwaitContext', () => {
       useEffect(() => {
         testAwait.init()
         expect(testAwait.getFullName()).toEqual(name)
+        expect(testAwait.state).toBeUndefined()
         setMounted(true)
       }, [])
 

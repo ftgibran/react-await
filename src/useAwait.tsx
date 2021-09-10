@@ -7,11 +7,11 @@ export function useAwait(name: string, index?: number) {
 
   const [state, setState] = useState<AwaitState>()
 
+  const getFullName = () => `${name}${index !== undefined ? `__${index}` : ''}`
+
   useEffect(() => {
     setState(context.record[getFullName()])
-  }, [context.record])
-
-  const getFullName = () => `${name}${index !== undefined ? `__${index}` : ''}`
+  }, [context.record[getFullName()]])
 
   const isStateUndefined = () => state === undefined
   const isStateStandby = () => state === AwaitState.STANDBY
@@ -19,13 +19,13 @@ export function useAwait(name: string, index?: number) {
   const isStateError = () => state === AwaitState.ERROR
 
   const setRecord = (state: AwaitState) => {
-    context.setRecord((data) => {
-      setState(state)
-      return {...data, [getFullName()]: state}
-    })
+    context.setRecord((data) => ({...data, [getFullName()]: state}))
   }
 
-  const init = () => setRecord(AwaitState.LOADING)
+  const init = () => {
+    setState(AwaitState.LOADING) // set before next render
+    setRecord(AwaitState.LOADING)
+  }
   const done = () => setRecord(AwaitState.STANDBY)
   const error = () => setRecord(AwaitState.ERROR)
 
