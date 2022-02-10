@@ -19,7 +19,24 @@ export interface AwaitContextOptions {
   defaultAnimationDuration?: number
 }
 
-export type AwaitContextState = AwaitContextData & AwaitContextOptions
+export type AwaitContextProps = AwaitContextData & AwaitContextOptions
 
-export type AwaitHandler = ReturnType<typeof useAwait>
-export type AwaitHandlerContext = ReturnType<typeof useAwaitContext>
+export type AwaitLoader = {
+  fullName: string
+  state: AwaitState
+  setState: (state: AwaitState) => void
+  isUnset: boolean
+  isStandby: boolean
+  isLoading: boolean
+  isError: boolean
+}
+
+export type AwaitController = {
+  init: () => void
+  done: () => void
+  error: () => void
+  run: <T>(cb: () => Promise<T>, delay?: number) => Promise<T>
+}
+
+export type UseAwaitReturn = ReturnType<typeof useAwait>
+export type UseAwaitContextReturn = ReturnType<typeof useAwaitContext>

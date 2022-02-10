@@ -1,37 +1,32 @@
-import PropTypes from 'prop-types'
-import React, {useEffect, useRef, useState} from 'react'
+import React from 'react'
 import {CSSTransition, SwitchTransition} from 'react-transition-group'
-import {useAwait} from './useAwait'
 import {AwaitContext} from './AwaitContext'
-import {AwaitHandler, AwaitState} from './types'
+import {AwaitLoaderContainer} from './AwaitLoaderContainer'
+import {AwaitState, AwaitLoader} from './types'
 
-export interface AwaitConsumerProps {
-  name?: string
-  index?: number
-  handler?: AwaitHandler
-  animationClassName?: string
-  animationDuration?: number
-  onLoadingStart?: () => void
-  onLoadingEnd?: () => void
-  onError?: () => void
-  children?: React.ReactElement | React.ReactElement[]
-  loadingView?: React.ReactElement
-  errorView?: React.ReactElement
-}
+const defaultAnimationClassName = 'fade-blur'
+const defaultAnimationDuration = 400
 
 type HTMLProps = React.DetailedHTMLProps<
   React.HTMLAttributes<HTMLDivElement>,
   HTMLDivElement
 >
 
-const defaultAnimationClassName = 'fade-blur'
-const defaultAnimationDuration = 400
+export interface AwaitConsumerProps extends HTMLProps {
+  loader: AwaitLoader
+  animationClassName?: string
+  animationDuration?: number
+  onLoadingStart?: () => void
+  onLoadingEnd?: () => void
+  onError?: () => void
+  loadingView?: React.ReactNode
+  errorView?: React.ReactNode
+  keepDimensions?: boolean
+}
 
-export function AwaitConsumer(props: AwaitConsumerProps & HTMLProps) {
+export const AwaitConsumer: React.FC<AwaitConsumerProps> = (props) => {
   const {
-    name,
-    index,
-    handler,
+    loader,
     animationClassName,
     animationDuration,
     onLoadingStart,
@@ -40,22 +35,17 @@ export function AwaitConsumer(props: AwaitConsumerProps & HTMLProps) {
     children,
     loadingView,
     errorView,
-    ...htmlProps
+    keepDimensions = true,
+    ...rest
   } = props
 
-  const controller: AwaitHandler | undefined = handler
-    ? handler
-    : name
-    ? useAwait(name, index)
-    : undefined
+  const ref = React.useRef<React.DetailedHTMLProps<any, any>>(null)
 
-  const ref = useRef<React.DetailedHTMLProps<any, any>>(null)
+  const [minHeight, setMinHeight] = React.useState<number>()
+  const [minWidth, setMinWidth] = React.useState<number>()
 
-  const [minHeight, setMinHeight] = useState<number>()
-  const [minWidth, setMinWidth] = useState<number>()
-
-  useEffect(() => {
-    switch (controller?.state) {
+  React.useEffect(() => {
+    switch (loader.state) {
       case AwaitState.LOADING:
         onLoadingStart?.()
         break
@@ -71,14 +61,14 @@ export function AwaitConsumer(props: AwaitConsumerProps & HTMLProps) {
       setMinHeight(ref.current.clientHeight)
       setMinWidth(ref.current.clientWidth)
     }
-  }, [controller?.state])
+  }, [loader.state, onError, onLoadingEnd, onLoadingStart])
 
   return (
     <AwaitContext.Consumer>
       {(state) => (
         <SwitchTransition mode={'out-in'}>
           <CSSTransition
-            key={controller?.state ?? AwaitState.STANDBY}
+            key={loader.state ?? AwaitState.STANDBY}
             classNames={
               animationClassName ??
               state.defaultAnimationClassName ??
@@ -89,53 +79,27 @@ export function AwaitConsumer(props: AwaitConsumerProps & HTMLProps) {
               state.defaultAnimationDuration ??
               defaultAnimationDuration
             }
-            unmountOnExit
-            appear
+            unmountOnExit={true}
+            appear={true}
           >
-            <div ref={ref} {...htmlProps}>
-              {controller?.isStateLoading() && (
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    minHeight,
-                    minWidth,
-                  }}
-                >
-                  {loadingView ?? state.defaultLoadingView ?? (
-                    <div>Loading...</div>
-                  )}
-                </div>
+            <div ref={ref} {...rest}>
+              {loader.isLoading && (
+                <AwaitLoaderContainer
+                  children={loadingView}
+                  fallback={state.defaultLoadingView}
+                  useContainer={keepDimensions}
+                  minWidth={minWidth}
+                  minHeight={minHeight}
+                />
               )}
 
-              {controller?.isStateError() &&
-                (errorView ?? (children as React.ReactElement) ?? <div />)}
+              {loader.isError && (errorView ?? children)}
 
-              {((controller?.isStateStandby() ||
-                controller?.isStateUndefined()) &&
-                (children as React.ReactElement)) ?? <div />}
+              {(loader.isStandby || loader.isUnset) && children}
             </div>
           </CSSTransition>
         </SwitchTransition>
       )}
     </AwaitContext.Consumer>
   )
-}
-
-AwaitConsumer.propTypes = {
-  name: PropTypes.string,
-  index: PropTypes.number,
-  handler: PropTypes.object,
-  animationClassName: PropTypes.string,
-  animationDuration: PropTypes.number,
-  onLoadingStart: PropTypes.func,
-  onLoadingEnd: PropTypes.func,
-  onError: PropTypes.func,
-  children: PropTypes.oneOfType([
-    PropTypes.element,
-    PropTypes.arrayOf(PropTypes.element.isRequired),
-  ]),
-  loadingView: PropTypes.element,
-  errorView: PropTypes.element,
 }

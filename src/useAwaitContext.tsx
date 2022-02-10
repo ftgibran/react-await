@@ -1,75 +1,113 @@
-import {useContext, useMemo} from 'react'
+import React from 'react'
 import {AwaitContext} from './AwaitContext'
 import {AwaitState} from './types'
 
 export function useAwaitContext() {
-  const context = useContext(AwaitContext)
+  const {record, setRecord, ...rest} = React.useContext(AwaitContext)
 
-  const getState = (name: string, index?: number) =>
-    context.record[getFullName(name, index)]
-
-  const getFullName = (name: string, index?: number) =>
-    `${name}${index !== undefined ? `__${index}` : ''}`
-
-  const isStateUndefined = (name: string, index?: number) =>
-    getState(name, index) === undefined
-
-  const isStateStandby = (name: string, index?: number) =>
-    getState(name, index) === AwaitState.STANDBY
-
-  const isStateLoading = (name: string, index?: number) =>
-    getState(name, index) === AwaitState.LOADING
-
-  const isStateError = (name: string, index?: number) =>
-    getState(name, index) === AwaitState.ERROR
-
-  const setRecord = (state: AwaitState, name: string, index?: number) =>
-    context.setRecord((data) => ({...data, [getFullName(name, index)]: state}))
-
-  const init = (name: string, index?: number) =>
-    setRecord(AwaitState.LOADING, name, index)
-
-  const done = (name: string, index?: number) =>
-    setRecord(AwaitState.STANDBY, name, index)
-
-  const error = (name: string, index?: number) =>
-    setRecord(AwaitState.ERROR, name, index)
-
-  async function run<T>(
-    name: string,
-    func: (...args: any[]) => Promise<T>,
-    delay?: number,
-    index?: number
-  ): Promise<T> {
-    try {
-      init(name, index)
-
-      if (delay) await new Promise((resolve) => setTimeout(resolve, delay))
-      const result = await func()
-
-      done(name, index)
-
-      return result
-    } catch (e) {
-      error(name, index)
-
-      throw e
-    }
-  }
-
-  return useMemo(
-    () => ({
-      stateRecord: context.record,
-      getFullName,
-      isStateUndefined,
-      isStateStandby,
-      isStateLoading,
-      isStateError,
-      init,
-      done,
-      error,
-      run,
-    }),
-    [context.record]
+  const getFullName = React.useCallback(
+    (name: string, index?: number) =>
+      `${name}${index !== undefined ? `__${index}` : ''}`,
+    []
   )
+
+  const getState = React.useCallback(
+    (name: string, index?: number) => record[getFullName(name, index)],
+    [getFullName, record]
+  )
+
+  const setState = React.useCallback(
+    (state: AwaitState, name: string, index?: number) => {
+      setRecord((data) => ({...data, [getFullName(name, index)]: state}))
+    },
+    [getFullName, setRecord]
+  )
+
+  const isUnset = React.useCallback(
+    (name: string, index?: number) => getState(name, index) === undefined,
+    [getState]
+  )
+
+  const isStandby = React.useCallback(
+    (name: string, index?: number) =>
+      getState(name, index) === AwaitState.STANDBY,
+    [getState]
+  )
+
+  const isLoading = React.useCallback(
+    (name: string, index?: number) =>
+      getState(name, index) === AwaitState.LOADING,
+    [getState]
+  )
+
+  const isError = React.useCallback(
+    (name: string, index?: number) =>
+      getState(name, index) === AwaitState.ERROR,
+    [getState]
+  )
+
+  const init = React.useCallback(
+    (name: string, index?: number) => {
+      setState(AwaitState.LOADING, name, index)
+    },
+    [setState]
+  )
+
+  const done = React.useCallback(
+    (name: string, index?: number) => {
+      setState(AwaitState.STANDBY, name, index)
+    },
+    [setState]
+  )
+
+  const error = React.useCallback(
+    (name: string, index?: number) => {
+      setState(AwaitState.ERROR, name, index)
+    },
+    [setState]
+  )
+
+  const run = React.useCallback(
+    async <T,>(
+      name: string,
+      callback: () => Promise<T>,
+      delay?: number,
+      index?: number
+    ) => {
+      try {
+        init(name, index)
+
+        if (delay) {
+          await new Promise((resolve) => setTimeout(resolve, delay))
+        }
+
+        const result = await callback()
+
+        done(name, index)
+
+        return result
+      } catch (e) {
+        error(name, index)
+        throw e
+      }
+    },
+    [done, error, init]
+  )
+
+  return {
+    getFullName,
+    getState,
+    setState,
+    isUnset,
+    isStandby,
+    isLoading,
+    isError,
+    init,
+    done,
+    error,
+    run,
+    record,
+    setRecord,
+    ...rest,
+  }
 }

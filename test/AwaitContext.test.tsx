@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React from 'react'
 import {render, cleanup, waitFor} from '@testing-library/react'
 import {
   AwaitConsumer,
@@ -8,9 +8,7 @@ import {
   useAwait,
 } from '../src'
 
-interface ContextProps {
-  hooker: React.ReactElement
-}
+type ContextProps = Omit<AwaitConsumerProps, 'loader'>
 
 describe('AwaitContext', () => {
   afterEach(() => cleanup())
@@ -18,10 +16,8 @@ describe('AwaitContext', () => {
   const name = 'test'
   let index: number | undefined = undefined
 
-  const Context = (
-    props: ContextProps & Omit<AwaitConsumerProps, 'name' | 'index'>
-  ) => {
-    const {hooker, ...awaitConsumerProps} = props
+  const App: React.FC<ContextProps> = (props) => {
+    const {children, ...rest} = props
 
     return (
       <AwaitProvider
@@ -29,53 +25,65 @@ describe('AwaitContext', () => {
         defaultAnimationClassName={'default-test'}
         defaultAnimationDuration={11}
       >
-        {hooker}
-        <AwaitConsumer name={name} index={index} {...awaitConsumerProps}>
-          <div data-testid={'standby'}>Standby</div>
-        </AwaitConsumer>
+        {children}
+
+        <AppChild {...rest} />
       </AwaitProvider>
     )
   }
 
-  it('matches initial state', async () => {
-    const Hooker = () => {
-      const testAwait = useAwait(name, index)
+  const AppChild: React.FC<Omit<AwaitConsumerProps, 'loader'>> = (props) => {
+    const {...rest} = props
+    const {loader} = useAwait(name, index)
 
-      useEffect(() => {
-        expect(testAwait.getFullName()).toEqual(name)
-        expect(testAwait.state).toBeUndefined()
-      }, [])
+    return (
+      <AwaitConsumer {...rest} loader={loader}>
+        <div data-testid={'standby'}>Standby</div>
+      </AwaitConsumer>
+    )
+  }
+
+  it('matches initial state', async () => {
+    const Hooker: React.FC = () => {
+      const {loader} = useAwait(name, index)
+
+      React.useEffect(() => {
+        expect(loader.fullName).toEqual(name)
+        expect(loader.state).toBeUndefined()
+      }, [loader.fullName, loader.state])
 
       return <React.Fragment />
     }
 
-    const {asFragment} = render(<Context hooker={<Hooker />} />)
+    const {asFragment} = render(<App children={<Hooker />} />)
 
     expect(asFragment()).toMatchSnapshot()
   })
 
   it('matches loading state', async () => {
     const Hooker = () => {
-      const testAwait = useAwait(name, index)
-      const [mounted, setMounted] = useState(false)
+      const {loader, controller} = useAwait(name, index)
+      const [mounted, setMounted] = React.useState(false)
 
-      useEffect(() => {
-        testAwait.init()
-        expect(testAwait.getFullName()).toEqual(name)
-        expect(testAwait.state).toBeUndefined()
+      React.useEffect(() => {
+        controller.init()
+        expect(loader.fullName).toEqual(name)
+        expect(loader.state).toBeUndefined()
         setMounted(true)
-      }, [])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [controller])
 
-      useEffect(() => {
+      React.useEffect(() => {
         if (mounted) {
-          expect(testAwait.state).toBe(AwaitState.LOADING)
+          expect(loader.state).toBe(AwaitState.LOADING)
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [mounted])
 
       return <React.Fragment />
     }
 
-    const {asFragment, getByTestId} = render(<Context hooker={<Hooker />} />)
+    const {asFragment, getByTestId} = render(<App children={<Hooker />} />)
 
     await waitFor(() => getByTestId('loading'))
 
@@ -84,30 +92,32 @@ describe('AwaitContext', () => {
 
   it('matches standby state', async () => {
     const Hooker = () => {
-      const testAwait = useAwait(name, index)
-      const [done, setDone] = useState(false)
+      const {loader, controller} = useAwait(name, index)
+      const [done, setDone] = React.useState(false)
 
-      const run = async () => {
-        expect(testAwait.getFullName()).toEqual(name)
-        expect(testAwait.state).toBeUndefined()
-        await testAwait.run(() => Promise.resolve(), 100)
-        setDone(true)
-      }
-
-      useEffect(() => {
-        run()
-      }, [])
-
-      useEffect(() => {
-        if (done) {
-          expect(testAwait.state).toBe(AwaitState.STANDBY)
+      React.useEffect(() => {
+        const run = async () => {
+          expect(loader.fullName).toEqual(name)
+          expect(loader.state).toBeUndefined()
+          await controller.run(() => Promise.resolve(), 100)
+          setDone(true)
         }
+
+        run()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [controller])
+
+      React.useEffect(() => {
+        if (done) {
+          expect(loader.state).toBe(AwaitState.STANDBY)
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [done])
 
       return <React.Fragment />
     }
 
-    const {asFragment, getByTestId} = render(<Context hooker={<Hooker />} />)
+    const {asFragment, getByTestId} = render(<App children={<Hooker />} />)
 
     await waitFor(() => getByTestId('loading'))
     await waitFor(() => getByTestId('standby'))
@@ -117,36 +127,38 @@ describe('AwaitContext', () => {
 
   it('matches error state', async () => {
     const Hooker = () => {
-      const testAwait = useAwait(name, index)
-      const [done, setDone] = useState(false)
+      const {loader, controller} = useAwait(name, index)
+      const [done, setDone] = React.useState(false)
 
-      const run = async () => {
-        expect(testAwait.getFullName()).toEqual(name)
-        expect(testAwait.state).toBeUndefined()
-        try {
-          await testAwait.run(() => Promise.reject(), 100)
-        } catch {
-          /**/
+      React.useEffect(() => {
+        const run = async () => {
+          expect(loader.fullName).toEqual(name)
+          expect(loader.state).toBeUndefined()
+          try {
+            await controller.run(() => Promise.reject(), 100)
+          } catch {
+            /**/
+          }
+          setDone(true)
         }
-        setDone(true)
-      }
 
-      useEffect(() => {
         run()
-      }, [])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [controller])
 
-      useEffect(() => {
+      React.useEffect(() => {
         if (done) {
-          expect(testAwait.state).toBe(AwaitState.ERROR)
+          expect(loader.state).toBe(AwaitState.ERROR)
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [done])
 
       return <React.Fragment />
     }
 
     const {asFragment, getByTestId} = render(
-      <Context
-        hooker={<Hooker />}
+      <App
+        children={<Hooker />}
         errorView={<div data-testid={'error'}>Error</div>}
       />
     )
@@ -161,57 +173,57 @@ describe('AwaitContext', () => {
     index = 0
 
     const Hooker = () => {
-      const testAwait = useAwait(name, index)
-      const [mounted, setMounted] = useState(false)
+      const {loader, controller, record} = useAwait(name, index)
+      const [mounted, setMounted] = React.useState(false)
 
-      useEffect(() => {
-        expect(testAwait.getFullName()).toEqual(`${name}__${index}`)
-        testAwait.init()
+      React.useEffect(() => {
+        expect(loader.fullName).toEqual(`${name}__${index}`)
+        controller.init()
         setMounted(true)
-      }, [])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [controller])
 
-      useEffect(() => {
+      React.useEffect(() => {
         if (mounted) {
-          expect(testAwait.stateRecord[testAwait.getFullName()]).toBe(
-            AwaitState.LOADING
-          )
+          expect(record[loader.fullName]).toBe(AwaitState.LOADING)
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
       }, [mounted])
 
       return <React.Fragment />
     }
 
-    render(<Context hooker={<Hooker />} />)
+    render(<App children={<Hooker />} />)
   })
 
   it('can use extra settings', async () => {
     const Hooker = () => {
-      const testAwait = useAwait(name, index)
-      const [done, setDone] = useState(false)
+      const {controller} = useAwait(name, index)
+      const [done, setDone] = React.useState(false)
 
-      useEffect(() => {
+      React.useEffect(() => {
+        const run1 = async () => {
+          await controller.run(() => Promise.resolve(), 100)
+          await new Promise((resolve) => setTimeout(resolve, 100))
+          setDone(true)
+        }
+
         run1()
-      }, [])
+      }, [controller])
 
-      useEffect(() => {
+      React.useEffect(() => {
+        const run2 = async () => {
+          try {
+            await controller.run(() => Promise.reject(), 100)
+          } catch {
+            /**/
+          }
+        }
+
         if (done) {
           run2()
         }
-      }, [done])
-
-      const run1 = async () => {
-        await testAwait.run(() => Promise.resolve(), 100)
-        await new Promise((resolve) => setTimeout(resolve, 100))
-        setDone(true)
-      }
-
-      const run2 = async () => {
-        try {
-          await testAwait.run(() => Promise.reject(), 100)
-        } catch {
-          /**/
-        }
-      }
+      }, [controller, done])
 
       return <React.Fragment />
     }
@@ -221,8 +233,8 @@ describe('AwaitContext', () => {
     let errorCount = 0
 
     const {asFragment, getByTestId} = render(
-      <Context
-        hooker={<Hooker />}
+      <App
+        children={<Hooker />}
         loadingView={
           <div data-testid={'forced-loading'}>Forced loading view</div>
         }

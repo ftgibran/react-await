@@ -27,7 +27,6 @@
     "styles"
   ],
   "peerDependencies": {
-    "prop-types": "^15.x",
     "react": "^17.x",
     "react-dom": "^17.x",
     "react-transition-group": "^4.x"
@@ -59,6 +58,7 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-react": "^7.24.0",
+    "eslint-plugin-react-hooks": "^4.3.0",
     "jest": "^27.0.6",
     "microbundle-crl": "^0.13.11",
     "np": "^7.5.0",

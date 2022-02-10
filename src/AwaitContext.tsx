@@ -1,7 +1,7 @@
 import React from 'react'
-import {AwaitContextState} from './types'
+import {AwaitContextProps} from './types'
 
-export const AwaitContext = React.createContext<AwaitContextState>({
+export const AwaitContext = React.createContext<AwaitContextProps>({
   record: {},
   setRecord: () => {
     /**/

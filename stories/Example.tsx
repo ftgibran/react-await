@@ -11,9 +11,9 @@ import {
 import '../styles/effect.css'
 
 export function ExampleConsumer() {
-  const awaitHandler1 = useAwait('test1')
-  const awaitHandler2 = useAwait('test2')
-  const awaitHandler3 = useAwait('test3')
+  const {loader: loader1, controller: controller1} = useAwait('test1')
+  const {loader: loader2, controller: controller2} = useAwait('test2')
+  const {loader: handler3, controller: controller3} = useAwait('test3')
 
   const runFakeSuccess = async () => {
     await new Promise((resolve) => setTimeout(resolve, 4000))
@@ -25,17 +25,25 @@ export function ExampleConsumer() {
   }
 
   const {data} = useAsync(runFakeSuccess, {
-    awaitHandler: awaitHandler3,
+    controller: controller3,
     initialData: 'wait',
     delay: 5000,
   })
 
-  // useEffect(() => {
-  //   alert(`${awaitHandler3.state} - ${data}`)
-  // }, [awaitHandler3.state])
+  // const [data, setData] = React.useState('wait')
+  // React.useEffect(() => {
+  //   const fetch = async () => {
+  //     await new Promise((resolve) => setTimeout(resolve, 4000))
+  //     return 'success'
+  //   }
+  //
+  //   controller3.run(fetch).then(setData)
+  //
+  //   console.log('fetch')
+  // }, [controller3])
 
   const stringifyState = () => {
-    switch (awaitHandler1.state) {
+    switch (loader1.state) {
       case AwaitState.LOADING:
         return 'Loading'
       case AwaitState.STANDBY:
@@ -50,15 +58,13 @@ export function ExampleConsumer() {
   const CustomButton = () => (
     <div style={{marginBottom: 20}}>
       <button
-        onClick={() => awaitHandler1.run(runFakeSuccess)}
+        onClick={() => controller1.run(runFakeSuccess)}
         style={{marginBottom: 20}}
       >
         Fake Success
       </button>
 
-      <button onClick={() => awaitHandler1.run(runFakeError)}>
-        Fake Error
-      </button>
+      <button onClick={() => controller1.run(runFakeError)}>Fake Error</button>
     </div>
   )
 
@@ -67,7 +73,7 @@ export function ExampleConsumer() {
       <div style={{marginBottom: 10}}>State: {stringifyState()}</div>
 
       <AwaitConsumer
-        handler={awaitHandler1}
+        loader={loader1}
         style={{width: 300, backgroundColor: '#eee', marginBottom: 10}}
         errorView={
           <div>
@@ -82,17 +88,17 @@ export function ExampleConsumer() {
       </AwaitConsumer>
 
       <AwaitConsumer
-        handler={awaitHandler2}
+        loader={loader2}
         style={{width: 300, backgroundColor: '#eee', marginBottom: 10}}
         loadingView={<div>custom loader...</div>}
       >
-        <button onClick={() => awaitHandler2.run(runFakeSuccess)}>
+        <button onClick={() => controller2.run(runFakeSuccess)}>
           Another Fake
         </button>
       </AwaitConsumer>
 
       <AwaitConsumer
-        handler={awaitHandler3}
+        loader={handler3}
         style={{width: 300, backgroundColor: '#eee'}}
       >
         <div>Loaded on start - {data}</div>

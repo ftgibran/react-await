@@ -1,39 +1,19 @@
-import React, {useState} from 'react'
-import PropTypes from 'prop-types'
+import React from 'react'
 import {AwaitContext} from './AwaitContext'
-import {AwaitContextOptions, AwaitContextState, AwaitState} from './types'
+import {AwaitContextOptions, AwaitContextProps, AwaitState} from './types'
 
-export interface AwaitProviderProps {
-  children?: React.ReactElement | React.ReactElement[]
-}
+export type AwaitProviderProps = AwaitContextOptions
 
-export function AwaitProvider(props: AwaitProviderProps & AwaitContextOptions) {
+export const AwaitProvider: React.FC<AwaitProviderProps> = (props) => {
   const {children, ...options} = props
 
-  const [record, setRecord] = useState<Record<string, AwaitState>>({})
+  const [record, setRecord] = React.useState<Record<string, AwaitState>>({})
 
-  const initialContextState: AwaitContextState = {
+  const context: AwaitContextProps = {
     record,
     setRecord,
     ...options,
   }
 
-  return (
-    <AwaitContext.Provider value={initialContextState}>
-      {children}
-    </AwaitContext.Provider>
-  )
-}
-
-AwaitProvider.propTypes = {
-  children: PropTypes.oneOfType([
-    PropTypes.element,
-    PropTypes.arrayOf(PropTypes.element.isRequired),
-  ]),
-  defaultLoadingView: PropTypes.element,
-}
-
-AwaitProvider.defaultProps = {
-  children: undefined,
-  defaultLoadingView: undefined,
+  return <AwaitContext.Provider value={context} children={children} />
 }

@@ -16,7 +16,7 @@ The structure uses Context and Hookers in order to use it in different parts of 
 ## Getting Started
 
 ```shell
-npm i @dev-plus-plus/react-await react react-dom react-transition-group prop-types
+npm i @dev-plus-plus/react-await react react-dom react-transition-group
 ```
 
 or simply
@@ -55,7 +55,7 @@ function App() {
 }
 
 function AnyOtherComponent() {
-  const fakeAwait = useAwait('fake') // set the name of consumer
+  const {loader, controller} = useAwait('fake') // set the name of consumer
 
   const runFakeSuccess = async () => {
     await new Promise((resolve) => setTimeout(resolve, 2000))
@@ -67,17 +67,17 @@ function AnyOtherComponent() {
 
   const renderButtons = () => (
     <div>
-      <button onClick={() => fakeAwait.run(runFakeSuccess)}>Fake Success</button>
-      <button onClick={() => fakeAwait.run(runFakeError)}>Fake Error</button>
+      <button onClick={() => controller.run(runFakeSuccess)}>Fake Success</button>
+      <button onClick={() => controller.run(runFakeError)}>Fake Error</button>
     </div>
   )
 
   return (
     <>
-      State: {fakeAwait.state}
+      State: {loader.state}
 
       <AwaitConsumer
-        name={'fake'} // required
+        loader={loader} // required
         animationClassName={'fade'} // default fade-blur
         animationDuration={400} // default 400
         onLoadingStart={() => alert('Triggered event - loading start')}
@@ -142,96 +142,96 @@ useAwait(name, index)
 |---|---|
 | The name of consumer | The index of consumer in case the consumer is inside a list |
 
-### The state property
+### record prop
+Returns a dictionary of all states registered.
+The key is the name of the consumer and the value is the current state.
+
+### laoder.state prop
 Returns the current state of loader represented by enum.
 The available states are: `LOADING`, `STANDBY`, `ERROR`.
 If the state is undefined that means the consumer never started.
 
-### The stateRecord property
-Returns a dictionary of all states registered.
-The key is the name of the consumer and the value is the current state.
-
-### getFullName method
+### loader.fullName prop
 Returns the full name of consumer.
 Normally, the full name is the real name.
 The exception is when the index is set.
 
-### isStateUndefined method
+### loader.isUnset prop
 Returns true if the state is undefined
 
-### isStateStandby method
+### loader.isStandby prop
 Returns true if the state is Standby
 
-### isStateLoading method
+### loader.isLoading prop
 Returns true if the state is Loading
 
-### isStateError method
+### loader.isError prop
 Returns true if the state is Error
 
-### init method
+### controller.init method
 Starts to load.
 
 Example:
 ```tsx
 // ...
-const testAwait = useAwait('test')
+const {controller} = useAwait('test')
 
 useEffect(() => {
-  testAwait.init() // start to load when the component mounts
+  controller.init() // start to load when the component mounts
 }, [])
 // ...
 ```
 
-### done method
+### controller.done method
 Finish the loading.
 
 Example:
 ```tsx
 // ...
-const testAwait = useAwait('test')
+const {controller} = useAwait('test')
 
 useEffect(() => {
   run()
 }, [])
 
 async function run() {
-  testAwait.init()
+  controller.init()
   await new Promise((resolve) => setTimeout(resolve, 1000))
-  testAwait.done() // end to load after 1 second
+  controller.done() // end to load after 1 second
 }
 // ...
 ```
 
-### error method
+### controller.error method
 Finish the loading with error.
 
 Example:
 ```tsx
 // ...
-const testAwait = useAwait('test')
+const {controller} = useAwait('test')
 
 useEffect(() => {
   run()
 }, [])
 
 async function run() {
-  testAwait.init()
+  controller.init()
   await new Promise((resolve) => setTimeout(resolve, 1000))
-  testAwait.error() // end to load with after 1 second
+  controller.error() // end to load with after 1 second
 }
 // ...
 ```
 
-### run method
+### loader.run method
 Starts to load, then finish the loading with success or error state.
 
 Example:
 ```tsx
 // ...
-const testAwait = useAwait('test')
+const {controller} = useAwait('test')
 
 useEffect(() => {
-  testAwait.run(() => Promise.resolve(), delay = 1000)
+  controller.run(() => Promise.resolve(), delay = 1000)
 }, [])
 // ...
 ```

@@ -1,11 +1,11 @@
-import {useCallback, useEffect, useRef, useState} from 'react'
-import type {AwaitHandler} from './types'
+import React from 'react'
+import {AwaitController} from './types'
 
 export interface UseAsyncProps<T, I extends T | undefined, P> {
   initialData?: I
   params?: P
   immediate?: boolean
-  awaitHandler?: AwaitHandler
+  controller?: AwaitController
   delay?: number
 }
 
@@ -13,14 +13,14 @@ export function useAsync<T, I extends T | undefined, P>(
   asyncFunc: (params: P) => Promise<T>,
   props: UseAsyncProps<T, I, P> = {}
 ) {
-  const {initialData, params, immediate = true, awaitHandler, delay} = props
+  const {initialData, params, immediate = true, controller, delay} = props
 
-  const [data, setData] = useState<T | I>(initialData as T)
-  const [error, setError] = useState<any | null>(null)
+  const [data, setData] = React.useState<T | I>(initialData as T)
+  const [error, setError] = React.useState<any | null>(null)
 
-  const mountedRef = useRef(true)
+  const mountedRef = React.useRef(true)
 
-  const fetch = useCallback(() => {
+  const fetch = React.useCallback(() => {
     return asyncFunc(params as P)
       .then((response) => {
         if (!mountedRef.current) return null
@@ -35,18 +35,19 @@ export function useAsync<T, I extends T | undefined, P>(
       })
   }, [asyncFunc, params])
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (immediate) {
-      if (awaitHandler) {
-        awaitHandler.run(fetch, delay)
+      if (controller) {
+        controller.run(fetch, delay).then()
       } else {
-        fetch()
+        fetch().then()
       }
     }
 
     return () => {
       mountedRef.current = false
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return {
