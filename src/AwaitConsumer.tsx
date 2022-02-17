@@ -68,6 +68,7 @@ export const AwaitConsumer: React.FC<AwaitConsumerProps> = (props) => {
       {(state) => (
         <SwitchTransition mode={'out-in'}>
           <CSSTransition
+            nodeRef={ref}
             key={loader.state ?? AwaitState.STANDBY}
             classNames={
               animationClassName ??
