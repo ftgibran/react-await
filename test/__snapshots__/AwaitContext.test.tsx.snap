@@ -18,6 +18,14 @@ exports[`AwaitContext can use extra settings 1`] = `
 </DocumentFragment>
 `;
 
+exports[`AwaitContext can use mountedBeforeStandby = false 1`] = `
+<DocumentFragment>
+  <div
+    class="default-test-exit default-test-exit-active"
+  />
+</DocumentFragment>
+`;
+
 exports[`AwaitContext matches error state 1`] = `
 <DocumentFragment>
   <div

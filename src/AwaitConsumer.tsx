@@ -22,6 +22,7 @@ export interface AwaitConsumerProps extends HTMLProps {
   loadingView?: React.ReactNode
   errorView?: React.ReactNode
   keepDimensions?: boolean
+  mountedBeforeStandby?: boolean
 }
 
 export const AwaitConsumer: React.FC<AwaitConsumerProps> = (props) => {
@@ -36,6 +37,7 @@ export const AwaitConsumer: React.FC<AwaitConsumerProps> = (props) => {
     loadingView,
     errorView,
     keepDimensions = true,
+    mountedBeforeStandby = true,
     ...rest
   } = props
 
@@ -43,6 +45,15 @@ export const AwaitConsumer: React.FC<AwaitConsumerProps> = (props) => {
 
   const [minHeight, setMinHeight] = React.useState<number>()
   const [minWidth, setMinWidth] = React.useState<number>()
+
+  const isUnset = React.useMemo(() => loader.isUnset, [loader.isUnset])
+  const isLoading = React.useMemo(() => loader.isLoading, [loader.isLoading])
+  const isStandby = React.useMemo(() => loader.isStandby, [loader.isStandby])
+  const isError = React.useMemo(() => loader.isError, [loader.isError])
+
+  const isReady = React.useMemo(() => {
+    return mountedBeforeStandby ? isStandby || isUnset : isStandby
+  }, [isStandby, isUnset, mountedBeforeStandby])
 
   React.useEffect(() => {
     switch (loader.state) {
@@ -84,7 +95,7 @@ export const AwaitConsumer: React.FC<AwaitConsumerProps> = (props) => {
             appear={true}
           >
             <div ref={ref} {...rest}>
-              {loader.isLoading && (
+              {isLoading && (
                 <AwaitLoaderContainer
                   children={loadingView}
                   fallback={state.defaultLoadingView}
@@ -94,9 +105,9 @@ export const AwaitConsumer: React.FC<AwaitConsumerProps> = (props) => {
                 />
               )}
 
-              {loader.isError && (errorView ?? children)}
+              {isError && (errorView ?? children)}
 
-              {(loader.isStandby || loader.isUnset) && children}
+              {isReady && children}
             </div>
           </CSSTransition>
         </SwitchTransition>

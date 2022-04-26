@@ -196,6 +196,29 @@ describe('AwaitContext', () => {
     render(<App children={<Hooker />} />)
   })
 
+  it('can use mountedBeforeStandby = false', async () => {
+    const Hooker: React.FC = () => {
+      const {controller} = useAwait(name, index)
+
+      React.useEffect(() => {
+        const run = async () => {
+          await controller.run(() => Promise.resolve(), 100)
+          await new Promise((resolve) => setTimeout(resolve, 100))
+        }
+
+        run()
+      }, [controller])
+
+      return <React.Fragment />
+    }
+
+    const {asFragment} = render(
+      <App children={<Hooker />} mountedBeforeStandby={false} />
+    )
+
+    expect(asFragment()).toMatchSnapshot()
+  })
+
   it('can use extra settings', async () => {
     const Hooker = () => {
       const {controller} = useAwait(name, index)
