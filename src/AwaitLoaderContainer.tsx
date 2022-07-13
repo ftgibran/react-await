@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {PropsWithChildren} from 'react'
 
 export interface AwaitLoaderContainerProps {
   fallback?: React.ReactNode
@@ -7,9 +7,9 @@ export interface AwaitLoaderContainerProps {
   minHeight?: number
 }
 
-export const AwaitLoaderContainer: React.FC<AwaitLoaderContainerProps> = (
-  props
-) => {
+export const AwaitLoaderContainer: React.FC<
+  PropsWithChildren<AwaitLoaderContainerProps>
+> = (props) => {
   const {children, fallback, useContainer, minWidth, minHeight} = props
 
   const value = React.useMemo(
