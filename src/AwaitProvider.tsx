@@ -1,8 +1,8 @@
-import React from 'react'
+import React, {PropsWithChildren} from 'react'
 import {AwaitContext} from './AwaitContext'
 import {AwaitContextOptions, AwaitContextProps, AwaitState} from './types'
 
-export type AwaitProviderProps = AwaitContextOptions
+export type AwaitProviderProps = PropsWithChildren<AwaitContextOptions>
 
 export const AwaitProvider: React.FC<AwaitProviderProps> = (props) => {
   const {children, ...options} = props
