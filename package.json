@@ -1,6 +1,6 @@
 {
   "name": "@dev-plus-plus/react-await",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "private": false,
   "author": "ftgibran",
   "license": "MIT",
@@ -34,7 +34,6 @@
   "resolutions": {
     "@types/react": "^18.0.15",
     "@types/react-dom": "^18.0.6"
-
   },
   "devDependencies": {
     "@babel/core": "^7.15.0",
