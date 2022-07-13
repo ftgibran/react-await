@@ -9,6 +9,7 @@ module.exports = {
     '@storybook/addon-links',
     '@storybook/addon-essentials'
   ],
+  staticDirs: ["../public"],
   reactOptions: {
     strictMode: true,
   }

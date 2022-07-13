@@ -2,7 +2,7 @@ import React from 'react'
 import {AwaitController, AwaitLoader, AwaitState} from './types'
 import {useAwaitContext} from './useAwaitContext'
 
-export function useAwait(name: string, index?: number) {
+export function useAwait(name?: string, index?: number) {
   const {
     getFullName,
     getState: getStateFromRecord,
@@ -18,69 +18,70 @@ export function useAwait(name: string, index?: number) {
     ...rest
   } = useAwaitContext()
 
-  const fullName = React.useMemo(() => getFullName(name, index), [
-    getFullName,
-    name,
-    index,
-  ])
+  const id = React.useId()
 
-  const state = React.useMemo(() => getStateFromRecord(name, index), [
-    getStateFromRecord,
-    name,
-    index,
-  ])
+  const params = React.useMemo<[string, number | undefined]>(() => {
+    if (name !== undefined) {
+      return [name, index]
+    }
 
-  const setState = React.useCallback(
-    (state: AwaitState) => setStateFromRecord(state, name, index),
-    [setStateFromRecord, name, index]
+    return [id, undefined]
+  }, [id, index, name])
+
+  const fullName = React.useMemo(
+    () => getFullName(...params),
+    [getFullName, params]
   )
 
-  const isUnset = React.useMemo(() => isUnsetFromRecord(name, index), [
-    isUnsetFromRecord,
-    name,
-    index,
-  ])
+  const state = React.useMemo(
+    () => getStateFromRecord(...params),
+    [getStateFromRecord, params]
+  )
 
-  const isStandby = React.useMemo(() => isStandbyFromRecord(name, index), [
-    isStandbyFromRecord,
-    name,
-    index,
-  ])
+  const setState = React.useCallback(
+    (state: AwaitState) => setStateFromRecord(state, ...params),
+    [setStateFromRecord, params]
+  )
 
-  const isLoading = React.useMemo(() => isLoadingFromRecord(name, index), [
-    isLoadingFromRecord,
-    name,
-    index,
-  ])
+  const isUnset = React.useMemo(
+    () => isUnsetFromRecord(...params),
+    [isUnsetFromRecord, params]
+  )
 
-  const isError = React.useMemo(() => isErrorFromRecord(name, index), [
-    isErrorFromRecord,
-    name,
-    index,
-  ])
+  const isStandby = React.useMemo(
+    () => isStandbyFromRecord(...params),
+    [isStandbyFromRecord, params]
+  )
 
-  const init = React.useCallback(() => initFromRecord(name, index), [
-    initFromRecord,
-    name,
-    index,
-  ])
+  const isLoading = React.useMemo(
+    () => isLoadingFromRecord(...params),
+    [isLoadingFromRecord, params]
+  )
 
-  const done = React.useCallback(() => doneFromRecord(name, index), [
-    doneFromRecord,
-    name,
-    index,
-  ])
+  const isError = React.useMemo(
+    () => isErrorFromRecord(...params),
+    [isErrorFromRecord, params]
+  )
 
-  const error = React.useCallback(() => errorFromRecord(name, index), [
-    errorFromRecord,
-    name,
-    index,
-  ])
+  const init = React.useCallback(
+    () => initFromRecord(...params),
+    [initFromRecord, params]
+  )
+
+  const done = React.useCallback(
+    () => doneFromRecord(...params),
+    [doneFromRecord, params]
+  )
+
+  const error = React.useCallback(
+    () => errorFromRecord(...params),
+    [errorFromRecord, params]
+  )
 
   const run = React.useCallback(
     <T,>(callback: () => Promise<T>, delay?: number) =>
-      runFromRecord(name, callback, delay, index),
-    [runFromRecord, name, index]
+      runFromRecord(params[0], callback, delay, params[1]),
+    [runFromRecord, params]
   )
 
   const loader: AwaitLoader = React.useMemo(

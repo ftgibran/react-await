@@ -12,17 +12,17 @@ import '../styles/effect.css'
 
 export function ExampleConsumer() {
   const {loader: loader1, controller: controller1} = useAwait('test1')
-  const {loader: loader2, controller: controller2} = useAwait('test2')
-  const {loader: handler3, controller: controller3} = useAwait('test3')
+  const {loader: loader2, controller: controller2} = useAwait()
+  const {loader: handler3, controller: controller3} = useAwait()
 
-  const runFakeSuccess = async () => {
+  const runFakeSuccess = React.useCallback(async () => {
     await new Promise((resolve) => setTimeout(resolve, 4000))
     return 'success'
-  }
+  }, [])
 
-  const runFakeError = async () => {
+  const runFakeError = React.useCallback(async () => {
     await new Promise((_resolve, reject) => setTimeout(reject, 4000))
-  }
+  }, [])
 
   const {data} = useAsync(runFakeSuccess, {
     controller: controller3,

@@ -18,37 +18,19 @@ export function useAsync<T, I extends T | undefined, P>(
   const [data, setData] = React.useState<T | I>(initialData as T)
   const [error, setError] = React.useState<any | null>(null)
 
-  const mountedRef = React.useRef(true)
-
   const fetch = React.useCallback(() => {
     return asyncFunc(params as P)
-      .then((response) => {
-        if (!mountedRef.current) return null
-        setData(response)
-        setError(null)
-        return response
-      })
-      .catch((err) => {
-        if (!mountedRef.current) return null
-        setError(err)
-        throw err
-      })
   }, [asyncFunc, params])
 
   React.useEffect(() => {
     if (immediate) {
       if (controller) {
-        controller.run(fetch, delay).then()
+        controller.run(fetch, delay).then(setData).catch(setError)
       } else {
-        fetch().then()
+        fetch().then(setData).catch(setError)
       }
     }
-
-    return () => {
-      mountedRef.current = false
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [controller, delay, fetch, immediate])
 
   return {
     data,
